@@ -1,8 +1,0 @@
-data,descricao,categoria,valor,tipo
-2025-01-05,Salário,Receita,3000,entrada
-2025-01-10,Aluguel,Moradia,-1200,saida
-2025-01-12,Internet,Serviços,-100,saida
-2025-01-15,Freelance,Receita,800,entrada
-2025-02-05,Salário,Receita,3000,entrada
-2025-02-10,Aluguel,Moradia,-1200,saida
-2025-02-18,Alimentação,Alimentação,-450,saida
