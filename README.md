@@ -3,26 +3,51 @@
 
 Este projeto é um **dashboard financeiro interativo** desenvolvido em **Python** usando **Streamlit**. Ele permite que o usuário carregue um arquivo CSV com dados financeiros e visualize **métricas, gráficos e relatórios detalhados**.
 
-O dashboard também permite exportar os dados filtrados em **CSV** e gerar um **PDF completo** com gráficos e uma imagem final.
+Este projeto é um **Dashboard Financeiro interativo**, desenvolvido em **Python com Streamlit**, que permite visualizar, analisar e exportar dados financeiros de forma simples e visual.
 
 ---
 
 ## 🚀 Funcionalidades
 
-- Upload de arquivo CSV com dados financeiros.
-- Filtro por mês ou exibição de **todos os meses**.
-- Métricas principais:
-  - Entradas
-  - Saídas
-  - Saldo
-- Gráficos:
-  - Entradas x Saídas (barras)
-  - Distribuição de gastos por categoria (pizza)
-  - Gastos individuais (barras horizontais)
-- Tabela detalhada das movimentações.
-- Exportação de:
-  - CSV do mês filtrado
-  - PDF completo com gráficos, tabela e imagem final.
+- 📅 **Filtro por mês** (incluindo opção *Todos os meses*)
+- 💰 **Métricas financeiras**:
+  - Total de entradas
+  - Total de saídas
+  - Saldo final
+- 📈 **Gráfico de barras** (Entradas x Saídas)
+- 🍕 **Gráfico de pizza** (Gastos por categoria)
+- 📉 **Gráfico de gastos individuais**
+- 📋 **Tabela detalhada das movimentações**
+- ⬇️ **Exportação dos dados em CSV**
+- 📄 **Exportação de relatório em PDF**, contendo:
+  - Resumo financeiro
+  - Gráfico
+  - Tabela detalhada
+  - Imagem final personalizada (`image.png`)
+- 🎨 **Paleta de cores rosa** em todo o dashboard
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Python**
+- **Streamlit**
+- **Pandas**
+- **Matplotlib**
+- **ReportLab** (geração de PDF)
+
+---
+
+## 📁 Estrutura do Projeto
+
+```text
+projeto/
+├── app.py
+├── financeiro.csv (deve substituir por outro csv)
+├── image.png
+├── requirements.txt
+└── README.md
+````
 
 ---
 
