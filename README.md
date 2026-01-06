@@ -2,6 +2,7 @@
 # 📊 Dashboard Financeiro com Streamlit
 
 Este projeto é um **Dashboard Financeiro interativo**, desenvolvido em **Python com Streamlit**, que permite visualizar, analisar e exportar dados financeiros de forma simples e visual.
+<img width="1900" height="897" alt="image" src="https://github.com/user-attachments/assets/9d842f66-fe97-483d-a390-d4b548e532b2" />
 
 ---
 
@@ -22,6 +23,8 @@ Este projeto é um **Dashboard Financeiro interativo**, desenvolvido em **Python
   - Gráfico
   - Tabela detalhada
   - Imagem final personalizada (`image.png`)
+    <img width="300" height="841" alt="image" src="https://github.com/user-attachments/assets/bf343a21-0374-4b6e-ba13-d912e5b86ba7" />
+
 - 🎨 **Paleta de cores rosa** em todo o dashboard
 
 ---
