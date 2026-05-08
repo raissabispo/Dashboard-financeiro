@@ -54,7 +54,23 @@ if arquivo is not None:
 
     try:
 
-        df_csv = pd.read_csv(arquivo)
+        df_csv = pd.read_csv(
+            arquivo,
+            sep=";"
+        )
+
+        df_csv.columns = (
+            df_csv.columns
+            .str.strip()
+            .str.lower()
+        )
+
+        # remover coluna mes
+        if "mes" in df_csv.columns:
+
+            df_csv = df_csv.drop(
+                columns=["mes"]
+            )
 
         colunas_necessarias = [
             "data",
@@ -70,7 +86,12 @@ if arquivo is not None:
         ):
 
             df_csv["data"] = pd.to_datetime(
-                df_csv["data"]
+                df_csv["data"],
+                errors="coerce"
+            )
+
+            df_csv = df_csv.dropna(
+                subset=["data"]
             )
 
             if "csv_importado" not in st.session_state:
@@ -81,7 +102,7 @@ if arquivo is not None:
                         "data": row["data"],
                         "descricao": row["descricao"],
                         "categoria": row["categoria"],
-                        "valor": row["valor"],
+                        "valor": float(row["valor"]),
                         "tipo": row["tipo"]
                     }
 
@@ -98,7 +119,7 @@ if arquivo is not None:
         else:
 
             st.error(
-                "CSV precisa conter:\n"
+                "❌ CSV precisa conter:\n"
                 "data, descricao, categoria, valor, tipo"
             )
 
@@ -188,34 +209,13 @@ if len(st.session_state.dados) > 0:
         df["data"]
     )
 
-    df["mes"] = (
-        df["data"]
-        .dt.to_period("M")
-        .astype(str)
-    )
-
     # =====================================
-    # FILTRO MÊS
+    # NOME DO MÊS
     # =====================================
 
-    lista_meses = ["Todos"] + sorted(
-        df["mes"].unique()
+    primeira_data = pd.to_datetime(
+        df["data"].iloc[0]
     )
-
-    mes_selecionado = st.selectbox(
-        "📅 Filtrar por mês",
-        lista_meses
-    )
-
-    df_mes = (
-        df
-        if mes_selecionado == "Todos"
-        else df[df["mes"] == mes_selecionado]
-    )
-
-    # =====================================
-    # NOME MÊS AUTOMÁTICO
-    # =====================================
 
     meses_pt = {
         1: "Janeiro",
@@ -232,36 +232,23 @@ if len(st.session_state.dados) > 0:
         12: "Dezembro"
     }
 
-    if not df_mes.empty:
-
-        primeira_data = pd.to_datetime(
-            df_mes["data"].iloc[0]
-        )
-
-        mes_numero = primeira_data.month
-
-        ano = primeira_data.year
-
-        nome_mes = (
-            f"{meses_pt[mes_numero]} de {ano}"
-        )
-
-    else:
-
-        nome_mes = "Sem dados"
+    nome_mes = (
+        f"{meses_pt[primeira_data.month]} "
+        f"de {primeira_data.year}"
+    )
 
     # =====================================
     # MÉTRICAS
     # =====================================
 
     total_entradas = (
-        df_mes[df_mes["tipo"] == "entrada"]
+        df[df["tipo"] == "entrada"]
         ["valor"]
         .sum()
     )
 
     total_saidas = (
-        df_mes[df_mes["tipo"] == "saida"]
+        df[df["tipo"] == "saida"]
         ["valor"]
         .sum()
     )
@@ -317,7 +304,7 @@ if len(st.session_state.dados) > 0:
     # =====================================
 
     gastos_categoria = (
-        df_mes[df_mes["tipo"] == "saida"]
+        df[df["tipo"] == "saida"]
         .groupby("categoria")["valor"]
         .sum()
         .abs()
@@ -329,13 +316,6 @@ if len(st.session_state.dados) > 0:
 
         fig_donut, ax_donut = plt.subplots(
             figsize=(8, 8)
-        )
-
-        gastos_categoria = (
-            gastos_categoria
-            .sort_values(
-                ascending=False
-            )
         )
 
         cores = [
@@ -411,7 +391,7 @@ if len(st.session_state.dados) > 0:
     # =====================================
 
     gastos_individuais = (
-        df_mes[df_mes["tipo"] == "saida"]
+        df[df["tipo"] == "saida"]
         .sort_values("valor")
     )
 
@@ -452,12 +432,12 @@ if len(st.session_state.dados) > 0:
     st.subheader("📋 Detalhamento")
 
     st.dataframe(
-        df_mes,
+        df,
         use_container_width=True
     )
 
     # =====================================
-    # EXCLUIR MOVIMENTAÇÃO
+    # EXCLUIR
     # =====================================
 
     st.subheader(
@@ -465,7 +445,7 @@ if len(st.session_state.dados) > 0:
     )
 
     for i, row in (
-        df_mes.reset_index()
+        df.reset_index()
         .iterrows()
     ):
 
@@ -509,7 +489,16 @@ if len(st.session_state.dados) > 0:
     # EXPORTAR CSV
     # =====================================
 
-    csv = df_mes.to_csv(
+    df_exportar = df.copy()
+
+    df_exportar["data"] = (
+        pd.to_datetime(
+            df_exportar["data"]
+        )
+        .dt.strftime("%Y-%m-%d")
+    )
+
+    csv = df_exportar.to_csv(
         index=False,
         sep=";",
         encoding="utf-8-sig"
@@ -523,7 +512,7 @@ if len(st.session_state.dados) > 0:
     )
 
     # =====================================
-    # GERAR PDF
+    # PDF
     # =====================================
 
     def gerar_pdf():
@@ -541,15 +530,11 @@ if len(st.session_state.dados) > 0:
 
         elementos = []
 
-        # =================================
-        # TÍTULO
-        # =================================
-
         elementos.append(
             Paragraph(
                 f"""
                 Relatório Financeiro<br/>
-                Mês: {nome_mes}
+                {nome_mes}
                 """,
                 estilos["Title"]
             )
@@ -558,10 +543,6 @@ if len(st.session_state.dados) > 0:
         elementos.append(
             Spacer(1, 20)
         )
-
-        # =================================
-        # RESUMO
-        # =================================
 
         resumo = Table([
             [
@@ -614,10 +595,6 @@ if len(st.session_state.dados) > 0:
             Spacer(1, 20)
         )
 
-        # =================================
-        # GRÁFICOS
-        # =================================
-
         for fig in [
             fig_resumo,
             fig_donut,
@@ -648,10 +625,6 @@ if len(st.session_state.dados) > 0:
                     Spacer(1, 20)
                 )
 
-        # =================================
-        # TABELA
-        # =================================
-
         dados = [[
             "Data",
             "Descrição",
@@ -661,7 +634,7 @@ if len(st.session_state.dados) > 0:
         ]]
 
         for _, row in (
-            df_mes.iterrows()
+            df.iterrows()
         ):
 
             dados.append([
@@ -718,24 +691,13 @@ if len(st.session_state.dados) > 0:
         elementos.append(tabela)
 
         # =================================
-        # IMAGE.PNG FINAL
+        # IMAGE.PNG
         # =================================
 
         if os.path.exists("image.png"):
 
             elementos.append(
                 Spacer(1, 30)
-            )
-
-            elementos.append(
-                Paragraph(
-                    "Imagem Final",
-                    estilos["Heading2"]
-                )
-            )
-
-            elementos.append(
-                Spacer(1, 10)
             )
 
             elementos.append(
@@ -746,10 +708,6 @@ if len(st.session_state.dados) > 0:
                 )
             )
 
-        # =================================
-        # GERAR PDF
-        # =================================
-
         pdf.build(elementos)
 
         buffer.seek(0)
@@ -757,10 +715,6 @@ if len(st.session_state.dados) > 0:
         return buffer
 
     pdf_buffer = gerar_pdf()
-
-    # =====================================
-    # EXPORTAR PDF
-    # =====================================
 
     st.download_button(
         "📄 Exportar PDF",
